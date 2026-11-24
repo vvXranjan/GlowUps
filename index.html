@@ -205,6 +205,13 @@ footer{padding:24px max(4vw,16px);font-size:13px;color:var(--mute);text-align:ce
 [hidden]{display:none!important}
 
 html{scroll-padding-top:76px}
+@media(max-width:600px){
+.brand{font-size:18px}.brand small{display:block;margin:2px 0 0;font-size:12.5px}
+.who{font-size:13px}nav.roles{margin-top:8px}nav.roles a{padding:10px 14px}
+.hscroll{flex-wrap:nowrap;overflow-x:auto;width:100%;scrollbar-width:none;padding-bottom:2px}.hscroll::-webkit-scrollbar{display:none}.hscroll .chip{flex:none}
+.site{padding-block:10px;gap:4px}.links{flex-wrap:nowrap;overflow-x:auto;width:100%;margin-left:0;gap:16px;scrollbar-width:none}.links::-webkit-scrollbar{display:none}.links a{flex:none;font-size:14px}.links a.cta{padding:6px 12px}
+.toolbar h1{font-size:24px}
+}
 </style>
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
 </head>
@@ -243,7 +250,7 @@ html{scroll-padding-top:76px}
       <div class="panel">
         <h2 id="minititle">The salon's chair board</h2>
         <p class="note" id="minisub" style="margin:0 0 10px">Bookings from the chat land here the moment they are confirmed.</p>
-        <div class="chips" id="minidays" style="margin-bottom:10px"></div>
+        <div class="chips hscroll" id="minidays" style="margin-bottom:10px"></div>
         <div class="boardwrap mini"><div class="board" id="mini"></div></div>
         <ul class="feed" id="feed"></ul>
         <p class="note" style="margin-top:12px">Demo: replies come from simple rules running in your browser, with sample salon data. The real BookMyStyle uses AI to understand free text and Hinglish, with the same booking checks.</p>
@@ -363,7 +370,6 @@ html{scroll-padding-top:76px}
     <a href="#customer" id="nav-customer">Customer</a>
     <a href="#reception" id="nav-reception">Reception</a>
     <a href="#owner" id="nav-owner">Owner</a>
-    <a href="#demo" class="back" style="margin-left:auto">Back to the BookMyStyle site</a>
   </nav>
 </header>
 <main id="app"></main>
@@ -563,7 +569,7 @@ function renderCustomer(){
         <button class="chip" data-st="any" aria-pressed="${cv.staff==='any'}">Anyone free<small>fastest slot</small></button>
         ${pros.map(st=>`<button class="chip" data-st="${st.id}" aria-pressed="${cv.staff===st.id}">${esc(st.name)}<small>${esc(st.title)}</small></button>`).join('')}
       </div></div>
-      <div class="step"><h3>Which day?</h3><div class="chips">${days.map(o=>`<button class="chip" data-o="${o}" aria-pressed="${cv.o===o}">${dlabel(o)}${o>1?'':`<small>${dlabel(o,true)}</small>`}</button>`).join('')}</div></div>
+      <div class="step"><h3>Which day?</h3><div class="chips hscroll">${days.map(o=>`<button class="chip" data-o="${o}" aria-pressed="${cv.o===o}">${dlabel(o)}${o>1?'':`<small>${dlabel(o,true)}</small>`}</button>`).join('')}</div></div>
       ${strip}
       <div class="step"><h3>Pick a time</h3><div class="slots">${slots}</div></div>
       ${cv.slot!=null&&pickedStaff?`<div class="step"><h3>Your details</h3>
@@ -610,7 +616,7 @@ function renderBoard(){
   const nm=nowMin(),showNow=rv.o===0&&nm>OPEN&&nm<CLOSE;
   $('#rbody').innerHTML=`<div class="toolbar"><div><h1>${dlabel(rv.o,true)}: ${booked} to come, ${done} done</h1><p class="sub" style="margin:0">${occ}% of chair time booked${ns?`, ${ns} no-show`:''}. Click an empty spot to book, or a booking to check out.</p></div>
   <button class="btn" id="newb">New booking</button></div>
-  <div class="toolbar"><div class="chips">${[-1,0,1,2,3,4,5,6].map(o=>`<button class="chip" data-ro="${o}" aria-pressed="${rv.o===o}">${o===-1?'Yesterday':dlabel(o)}</button>`).join('')}</div>
+  <div class="toolbar"><div class="chips hscroll">${[-1,0,1,2,3,4,5,6].map(o=>`<button class="chip" data-ro="${o}" aria-pressed="${rv.o===o}">${o===-1?'Yesterday':dlabel(o)}</button>`).join('')}</div>
   <div class="legend"><span><i style="background:var(--busy)"></i>Booked</span><span><i style="background:var(--brassT);border:1px solid var(--brass)"></i>Done, paid</span><span><i style="border:1px solid var(--warn)"></i>No-show</span><span><i style="background:repeating-linear-gradient(135deg,var(--line) 0 3px,transparent 3px 6px)"></i>Lunch</span></div></div>
   <div class="boardwrap"><div class="board">
    <div class="brow"><div class="bname"></div><div class="track hours">${[10,11,12,13,14,15,16,17,18,19].map(h=>`<span style="left:${(h-10)*10}%;${h===10?'transform:none':''}">${fmt(h*60)}</span>`).join('')}</div></div>
