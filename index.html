@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GlowUps for salons</title>
+<title>BookMyStyle for salons</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -198,6 +198,10 @@ footer{padding:24px max(4vw,16px);font-size:13px;color:var(--mute);text-align:ce
 .appbar{background:var(--plum);color:#f7eaf3;padding:8px max(4vw,16px) 0;border-top:1px solid rgba(255,255,255,.15)}
 .appbar .top{align-items:center}
 .back{color:#f7eaf3;font-size:14px;opacity:.85}
+.team{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:16px}
+.mate{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;grid-template-columns:56px minmax(0,1fr);gap:14px;align-items:start}
+.face{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:18px;color:#fff;background:var(--c)}
+.mate h3{margin:2px 0 0;font-size:18px}.mate .role{margin:2px 0 10px;color:var(--rose);font-weight:600;font-size:14px}.mate p:last-child{margin:0;color:var(--mute);font-size:15px}
 [hidden]{display:none!important}
 
 html{scroll-padding-top:76px}
@@ -205,8 +209,8 @@ html{scroll-padding-top:76px}
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
 </head>
 <body>
-<nav class="site" aria-label="GlowUps">
-  <a class="logo" href="#top"><i aria-hidden="true"></i>GlowUps</a>
+<nav class="site" aria-label="BookMyStyle">
+  <a class="logo" href="#top"><i aria-hidden="true"></i>BookMyStyle</a>
   <div class="links">
     <a href="#how">How it works</a>
     <a href="#demo">Live demo</a>
@@ -220,7 +224,7 @@ html{scroll-padding-top:76px}
 <section class="hero" id="demo">
   <div class="hin">
     <h1>A WhatsApp receptionist for your salon</h1>
-    <p class="lead">GlowUps answers customers, books only real free slots, sends reminders and brings regulars back. Your team sees every booking on one chair board.</p>
+    <p class="lead">BookMyStyle answers customers, books only real free slots, sends reminders and brings regulars back. Your team sees every booking on one chair board.</p>
     <div class="chips"><a class="btn" href="#demo-chat" id="trybtn" style="text-decoration:none;display:inline-flex;align-items:center">Try the live demo</a><a class="btn ghost" href="#reception" style="text-decoration:none;display:inline-flex;align-items:center;color:#fff;border-color:rgba(255,255,255,.4)">Open the salon dashboard</a></div>
     <div class="heroGrid" id="demo-chat">
       <div>
@@ -242,7 +246,7 @@ html{scroll-padding-top:76px}
         <div class="chips" id="minidays" style="margin-bottom:10px"></div>
         <div class="boardwrap mini"><div class="board" id="mini"></div></div>
         <ul class="feed" id="feed"></ul>
-        <p class="note" style="margin-top:12px">Demo: replies come from simple rules running in your browser, with sample salon data. The real GlowUps uses AI to understand free text and Hinglish, with the same booking checks.</p>
+        <p class="note" style="margin-top:12px">Demo: replies come from simple rules running in your browser, with sample salon data. The real BookMyStyle uses AI to understand free text and Hinglish, with the same booking checks.</p>
       </div>
     </div>
   </div>
@@ -253,7 +257,7 @@ html{scroll-padding-top:76px}
     <h2>Salons lose customers when nobody answers</h2>
     <p class="intro">Most small salons face the same four problems. Each one costs bookings.</p>
     <div class="probs">
-      <div class="prob"><h3>Messages go unanswered</h3><p>The team is busy with customers, so WhatsApp waits for hours. The customer books somewhere else.</p><p class="fix">GlowUps replies in seconds, day and night.</p></div>
+      <div class="prob"><h3>Messages go unanswered</h3><p>The team is busy with customers, so WhatsApp waits for hours. The customer books somewhere else.</p><p class="fix">BookMyStyle replies in seconds, day and night.</p></div>
       <div class="prob"><h3>The same questions all day</h3><p>Prices, timings, "is Amit free at 5?" Every call pulls someone away from a chair.</p><p class="fix">It answers from your real price list and schedule.</p></div>
       <div class="prob"><h3>Forgotten appointments</h3><p>No-shows leave a stylist idle and a slot wasted.</p><p class="fix">Reminders a day before and 2 hours before.</p></div>
       <div class="prob"><h3>Regulars quietly drift away</h3><p>Nobody notices that a customer who came every month has not been back in two.</p><p class="fix">A list of regulars to win back, ready to message.</p></div>
@@ -266,7 +270,7 @@ html{scroll-padding-top:76px}
     <h2>How it works</h2>
     <p class="intro">Nothing new to install for your customers. They message your salon's WhatsApp number like they already do.</p>
     <ol class="steps">
-      <li><h3>Customer messages your salon</h3><p>"Haircut kal 5 baje Amit ke saath?" GlowUps understands the service, day, time and stylist.</p></li>
+      <li><h3>Customer messages your salon</h3><p>"Haircut kal 5 baje Amit ke saath?" BookMyStyle understands the service, day, time and stylist.</p></li>
       <li><h3>It checks real free slots</h3><p>It offers only times when that stylist is actually free, outside lunch, then asks the customer to confirm.</p></li>
       <li><h3>Your team sees it instantly</h3><p>The booking appears on the chair board. Reminders go out on their own. Staff mark it done with one message.</p></li>
       <li><h3>You get the numbers</h3><p>Daily report on WhatsApp: customers, earnings, no-shows, top stylist, and who to win back.</p></li>
@@ -324,13 +328,29 @@ html{scroll-padding-top:76px}
     <div class="pgrid">
       <div><b>Week 1</b>We load your services, prices, staff and timings, and connect your WhatsApp number.</div>
       <div><b>Week 2</b>Your team learns the 5 staff commands in a 30-minute session. We go live.</div>
-      <div><b>Days 15 to 45</b>We measure bookings, no-shows and repeat visits against your numbers before GlowUps.</div>
+      <div><b>Days 15 to 45</b>We measure bookings, no-shows and repeat visits against your numbers before BookMyStyle.</div>
       <div><b>Day 45</b>You see the results and decide. No lock-in.</div>
     </div>
-    <p style="margin:0">Talk to <b>Vaibhav Ranjan</b>, founder.</p>
+    <a class="btn" href="#team" style="text-decoration:none;display:inline-flex;align-items:center">Meet our team</a>
   </div>
 </section>
-<footer>GlowUps · AI WhatsApp automation for salons · Jaipur. The salon, people and figures in this demo are sample data.</footer>
+<section class="sec" id="team">
+  <div class="hin">
+    <h2>Meet our team</h2>
+    <p class="intro">The four people who build BookMyStyle, set it up in your salon and answer when you need us.</p>
+    <div class="team">
+      <article class="mate"><div class="face" style="--c:var(--brass)" aria-hidden="true">KN</div><div><h3>Karthik Nanda</h3><p class="role">Operations</p>
+        <p>The calm, senior head of the team. Karthik makes sure every salon goes live smoothly and keeps running that way. When something needs a wise call, the rest of us go to him.</p></div></article>
+      <article class="mate"><div class="face" style="--c:var(--rose)" aria-hidden="true">KS</div><div><h3>Kuman Singh Sonwani</h3><p class="role">IT · IIIT Naya Raipur</p>
+        <p>Our IT guy and a proper Gen Z: relaxed, unbothered and quick. He keeps the servers, WhatsApp setup and integrations running, often fixing things before anyone notices they broke.</p></div></article>
+      <article class="mate"><div class="face" style="--c:var(--plum2)" aria-hidden="true">VR</div><div><h3>Vaibhav Vikas Ranjan</h3><p class="role">Founder, tech · IIIT Naya Raipur</p>
+        <p>The one who built BookMyStyle. A Gen Z engineer who loves to explore, build and ask "why not?". He designed the booking engine, the chat and the dashboards you just tried.</p></div></article>
+      <article class="mate"><div class="face" style="--c:#2f6b5d" aria-hidden="true">SL</div><div><h3>Sohan Lal</h3><p class="role">Operations · IIT Bombay, Chemical Engineering</p>
+        <p>An engineer who would rather talk to people than to machines. Sohan meets salon owners, learns how their day really runs, and turns that into a setup that fits.</p></div></article>
+    </div>
+  </div>
+</section>
+<footer>BookMyStyle · AI WhatsApp automation for salons · Jaipur. The demo salon, its staff, customers and figures are sample data.</footer>
 </div>
 
 <div id="appwrap" hidden>
@@ -343,7 +363,7 @@ html{scroll-padding-top:76px}
     <a href="#customer" id="nav-customer">Customer</a>
     <a href="#reception" id="nav-reception">Reception</a>
     <a href="#owner" id="nav-owner">Owner</a>
-    <a href="#demo" class="back" style="margin-left:auto">Back to the GlowUps site</a>
+    <a href="#demo" class="back" style="margin-left:auto">Back to the BookMyStyle site</a>
   </nav>
 </header>
 <main id="app"></main>
@@ -461,7 +481,7 @@ const stock={};
  for(const p of PRODUCTS){const wk=u[p.id]/4;p.min=r(wk*.5,p);stock[p.id]=r(wk*COVER[p.id],p)}}
 
 /* ---------- saved changes (this browser only) ---------- */
-const KEY='glowups-site-v1';
+const KEY='bookmystyle-site-v1';
 let saved={day:dkey(0),added:[],status:{},custs:[],stock:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.day===saved.day)saved=s}catch(e){}
 const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}};
@@ -783,7 +803,7 @@ function pickDemoCustomer(){
 const PERSONA={
   cust:{title:'The Glow Room',sub:'Business account · replies instantly',av:'GR',tip:'Try typing: "haircut kal 5 baje", "facial price", "timings", "cancel my booking".'},
   staff:{title:'The Glow Room, staff line',sub:'You are Amit Sharma, stylist',av:'GR',tip:'Try: "today", "tomorrow", "done 1234 upi" with a code from your list, "noshow 1234".'},
-  owner:{title:'GlowUps owner line',sub:'You are Vaibhav, owner',av:'GU',tip:'Try: "report", "tomorrow", "top staff", "inactive", "stock".'}};
+  owner:{title:'BookMyStyle owner line',sub:'You are Vaibhav, owner',av:'GU',tip:'Try: "report", "tomorrow", "top staff", "inactive", "stock".'}};
 const clock=()=>{const n=new Date();return fmt(n.getHours()*60+n.getMinutes())};
 const fmtMsg=t=>esc(t).replace(/\*([^*]+)\*/g,'<b>$1</b>');
 function push(p,from,text,btns){chat.log[p].push({from,text,btns:btns||null,at:clock()});if(p===chat.p)renderChat()}

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GlowUps salon demo</title>
+<title>BookMyStyle salon demo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -121,7 +121,7 @@ td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 <body>
 <header>
   <div class="top">
-    <div class="brand">The Glow Room <small>Vaishali Nagar, Jaipur · powered by GlowUps</small></div>
+    <div class="brand">The Glow Room <small>Vaishali Nagar, Jaipur · powered by BookMyStyle</small></div>
     <div class="who" id="who"></div>
   </div>
   <nav class="roles" aria-label="Choose view">
@@ -243,7 +243,7 @@ const stock={};
  for(const p of PRODUCTS){const wk=u[p.id]/4;p.min=r(wk*.5,p);stock[p.id]=r(wk*COVER[p.id],p)}}
 
 /* ---------- saved changes (this browser only) ---------- */
-const KEY='glowups-demo-v1';
+const KEY='bookmystyle-demo-v1';
 let saved={day:dkey(0),added:[],status:{},custs:[],stock:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.day===saved.day)saved=s}catch(e){}
 const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}};

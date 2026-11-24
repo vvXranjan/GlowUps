@@ -1,4 +1,4 @@
--- GlowUps core schema for Supabase (Postgres 15+)
+-- BookMyStyle core schema for Supabase (Postgres 15+)
 -- Run in the Supabase SQL editor. Tested on Postgres 16 with a 2-stylist seed:
 -- slots, holds, overlap blocking, hold expiry, time off and customer stats all checked.
 -- Not yet tested: RLS with real Supabase Auth logins.
