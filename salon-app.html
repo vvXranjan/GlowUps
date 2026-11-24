@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GlowUps salon demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calm front-desk software, plain words, numbers you can trust.
+   IDEA: the salon's appointment book: one row per chair, the day running left to right.
+   PICTURE: the chair board (reception), slot grid (customer), earnings chart (owner).
+   COLOUR and TYPE: deep plum band, Jaipur rose for action, mirror-brass for done; Figtree throughout.
+   LAYOUT: plum header with role switch; each view opens straight onto its working tool. */
+:root{color-scheme:light dark;
+--bg:light-dark(#faf6f7,#140d16);--card:light-dark(#ffffff,#1f1622);--ink:light-dark(#24162a,#f3e9f1);--mute:light-dark(#6f5f73,#b6a5b8);
+--line:light-dark(#eadde4,#3a2b3e);--plum:#3b1b40;--plum2:light-dark(#5a2c61,#c9a3cf);--rose:light-dark(#c8336a,#ef6f9c);--roseT:light-dark(#fbe3ec,#3d1a29);
+--brass:light-dark(#9a7028,#d8b26a);--brassT:light-dark(#f6ecd8,#33291a);--busy:light-dark(#5a2c61,#7c4a84);--warn:light-dark(#b3261e,#ff8a80);--warnT:light-dark(#fde7e5,#3b1715)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,sans-serif;overflow-x:clip}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--rose);outline-offset:2px}
+header{background:var(--plum);color:#f7eaf3;padding:14px max(4vw,16px) 0}
+.top{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline;justify-content:space-between}
+.brand{font-weight:800;font-size:22px;letter-spacing:-.01em}.brand small{font-weight:500;font-size:14px;opacity:.75;margin-left:8px}
+.who{font-size:14px;opacity:.85}
+nav.roles{display:flex;gap:4px;margin-top:12px;overflow-x:auto}
+nav.roles a{color:#f7eaf3;text-decoration:none;padding:12px 18px;border-radius:12px 12px 0 0;font-weight:600;white-space:nowrap;opacity:.8}
+nav.roles a[aria-current=page]{background:var(--bg);color:var(--ink);opacity:1}
+main{padding:24px max(4vw,16px) 48px;max-width:1320px;margin:0 auto}
+h1{font-size:clamp(26px,3.4vw,36px);line-height:1.1;margin:0 0 6px;text-wrap:balance;letter-spacing:-.015em}
+h2{font-size:20px;margin:0 0 12px}h3{font-size:16px;margin:0 0 8px}
+.sub{color:var(--mute);margin:0 0 20px}
+.note{font-size:13px;color:var(--mute)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:20px;align-items:start}
+.grid2b{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;align-items:start;margin-top:20px}
+@media(max-width:900px){.grid2,.grid2b{grid-template-columns:minmax(0,1fr)}}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:9px 14px;min-height:44px;font-weight:600;font-size:14px}
+.chip[aria-pressed=true]{background:var(--plum);border-color:var(--plum);color:#fff}
+.chip small{display:block;font-weight:500;font-size:12px;opacity:.75}
+.btn{border:0;border-radius:12px;padding:11px 18px;min-height:44px;font-weight:700;background:var(--rose);color:#fff}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:14px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+input,select{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 12px;min-height:44px;font-size:16px;width:100%}
+label{font-size:14px;font-weight:600;display:block}label input,label select{margin-top:4px;font-weight:400}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+/* services menu */
+.cat{margin-bottom:18px}.cat h3{color:var(--plum2)}
+.svc{display:flex;width:100%;justify-content:space-between;gap:12px;text-align:left;border:1px solid transparent;background:none;border-radius:12px;padding:10px 12px;min-height:44px}
+.svc:hover{background:var(--roseT)}.svc[aria-pressed=true]{border-color:var(--rose);background:var(--roseT)}
+.svc span:last-child{white-space:nowrap;color:var(--mute)}.svc b{font-weight:600}
+.step{margin-bottom:22px}.step h3{display:flex;gap:8px;align-items:baseline}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.slot{border:1px solid var(--rose);color:var(--rose);background:var(--card);border-radius:10px;min-height:44px;font-weight:700;font-size:14px;white-space:nowrap}
+.slot[aria-pressed=true]{background:var(--rose);color:#fff}
+.slot:disabled{border-color:var(--line);color:var(--mute);text-decoration:line-through;background:transparent;cursor:not-allowed;font-weight:500}
+.slot small{display:block;font-size:11px;font-weight:500}
+.period{font-size:13px;font-weight:700;color:var(--mute);margin:14px 0 6px}
+.lunch{grid-column:1/-1;border:1px dashed var(--line);border-radius:10px;padding:10px;text-align:center;font-size:13px;color:var(--mute);background:repeating-linear-gradient(135deg,transparent 0 8px,var(--line) 8px 9px)}
+.strip{position:relative;height:34px;border-radius:8px;background:var(--roseT);overflow:hidden;margin-top:6px}
+.strip i{position:absolute;top:0;bottom:0;background:var(--busy)}
+.strip i.l{background:repeating-linear-gradient(135deg,var(--line) 0 6px,transparent 6px 12px)}
+.ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);margin-top:4px}
+.ok{background:var(--brassT);border:1px solid var(--brass);border-radius:14px;padding:14px 16px;margin-top:14px}
+/* board */
+.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--mute)}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:5px}
+.boardwrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+.board{min-width:900px}
+.brow{display:grid;grid-template-columns:150px minmax(0,1fr);border-bottom:1px solid var(--line)}
+.brow:last-child{border-bottom:0}
+.bname{padding:10px 12px;font-size:14px;line-height:1.25;border-right:1px solid var(--line)}
+.bname b{display:block;font-weight:700}.bname span{color:var(--mute);font-size:12px}
+.track{position:relative;height:58px;cursor:copy;background-image:repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px 10%)}
+.hours{height:30px;cursor:default;background:none}
+.hours span{position:absolute;top:6px;font-size:12px;color:var(--mute);transform:translateX(-50%);white-space:nowrap}
+.lb{position:absolute;top:0;bottom:0;left:30%;width:10%;background:repeating-linear-gradient(135deg,var(--line) 0 6px,transparent 6px 12px);pointer-events:none}
+.bk{position:absolute;top:6px;bottom:6px;border-radius:8px;padding:4px 7px;font-size:12px;line-height:1.25;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border:0;text-align:left;background:var(--busy);color:#fff}
+.bk.done{background:var(--brassT);color:var(--ink);border:1px solid var(--brass)}
+.bk.noshow{background:repeating-linear-gradient(135deg,var(--warnT) 0 6px,transparent 6px 12px);color:var(--warn);border:1px solid var(--warn)}
+.bk b{font-weight:700}
+.now{position:absolute;top:0;bottom:0;width:2px;background:var(--rose);pointer-events:none}
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:13px;color:var(--mute);font-weight:600}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.pill.low{background:var(--warnT);color:var(--warn)}.pill.okp{background:var(--brassT);color:var(--brass)}.pill.soon{background:var(--roseT);color:var(--rose)}
+/* owner */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.kpi span{font-size:13px;color:var(--mute);display:block}.kpi b{font-size:clamp(22px,2.4vw,28px);font-variant-numeric:tabular-nums;display:block;line-height:1.2;white-space:nowrap}
+.kpi small{font-size:13px;color:var(--mute)}.up{color:var(--brass)}.down{color:var(--warn)}
+.fig{position:relative;height:260px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.bar{display:grid;grid-template-columns:130px minmax(0,1fr) 80px;gap:10px;align-items:center;font-size:14px;margin:8px 0}
+.bar div{height:14px;border-radius:7px;background:var(--roseT);overflow:hidden}.bar div i{display:block;height:100%;background:var(--rose);border-radius:7px}
+.bar span:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.scroll{overflow-x:auto}
+/* dialog */
+.ov{position:fixed;inset:0;background:rgba(20,8,24,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:9}
+.ov.open{display:flex}
+.dlg{background:var(--card);border-radius:18px;max-width:560px;width:100%;max-height:92vh;overflow:auto;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.dlg .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.kv{display:grid;grid-template-columns:110px minmax(0,1fr);gap:6px 12px;font-size:15px}.kv span{color:var(--mute)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--plum);color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;opacity:0;transition:opacity .25s;pointer-events:none;z-index:10;max-width:90vw}
+.toast.show{opacity:1}
+@media(prefers-reduced-motion:reduce){.toast{transition:none}}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:9em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:8.5em;margin-inline-start:-9em;color:var(--mute)}.stack td:empty{display:none}.bar{grid-template-columns:96px minmax(0,1fr) 70px}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="brand">The Glow Room <small>Vaishali Nagar, Jaipur · powered by GlowUps</small></div>
+    <div class="who" id="who"></div>
+  </div>
+  <nav class="roles" aria-label="Choose view">
+    <a href="#customer" id="nav-customer">Customer</a>
+    <a href="#reception" id="nav-reception">Reception</a>
+    <a href="#owner" id="nav-owner">Owner</a>
+  </nav>
+</header>
+<main id="app"></main>
+<div class="ov" id="ov" role="dialog" aria-modal="true"><div class="dlg" id="dlg"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+{
+/* ---------- fixed salon setup ---------- */
+const OPEN=600,CLOSE=1200,L1=780,L2=840,STEP=15;
+const STAFF=[
+ {id:'amit',name:'Amit Sharma',g:'M',title:'Senior barber',sk:['mhair']},
+ {id:'rohit',name:'Rohit Meena',g:'M',title:'Barber',sk:['mhair']},
+ {id:'imran',name:'Imran Qureshi',g:'M',title:'Stylist, colour',sk:['mhair','colour']},
+ {id:'sandeep',name:'Sandeep Yadav',g:'M',title:'Barber, massage',sk:['mhair','spa']},
+ {id:'deepak',name:'Deepak Saini',g:'M',title:'Spa therapist',sk:['spa']},
+ {id:'neha',name:'Neha Gupta',g:'F',title:'Senior stylist',sk:['whair','colour']},
+ {id:'pooja',name:'Pooja Rathore',g:'F',title:'Beautician',sk:['beauty']},
+ {id:'anjali',name:'Anjali Verma',g:'F',title:'Nail artist',sk:['nails']},
+ {id:'sunita',name:'Sunita Kumawat',g:'F',title:'Beautician, nails',sk:['beauty','nails']},
+ {id:'kavya',name:'Kavya Jain',g:'F',title:'Stylist, keratin',sk:['whair','colour']}];
+const SVC=[
+ {id:'mcut',cat:'Hair',name:'Haircut (men)',dur:30,price:250,sk:'mhair',w:6,g:'M'},
+ {id:'wcut',cat:'Hair',name:'Haircut (women)',dur:45,price:500,sk:'whair',w:4,g:'F'},
+ {id:'wash',cat:'Hair',name:'Hair wash and blow-dry',dur:30,price:350,sk:'whair',w:3,g:'F'},
+ {id:'hspa',cat:'Hair',name:'Hair spa',dur:60,price:1200,sk:'whair',w:2,g:'F'},
+ {id:'colour',cat:'Hair',name:'Global hair colour',dur:90,price:2500,sk:'colour',w:2,g:'F'},
+ {id:'keratin',cat:'Hair',name:'Keratin treatment',dur:150,price:5000,sk:'colour',w:1,g:'F'},
+ {id:'beard',cat:'Grooming',name:'Beard trim and shape',dur:15,price:150,sk:'mhair',w:4,g:'M'},
+ {id:'shave',cat:'Grooming',name:'Clean shave',dur:15,price:120,sk:'mhair',w:1,g:'M'},
+ {id:'cleanup',cat:'Skin',name:'Clean-up',dur:45,price:800,sk:'beauty',w:3,g:'F'},
+ {id:'facial',cat:'Skin',name:'Fruit facial',dur:60,price:1200,sk:'beauty',w:3,g:'F'},
+ {id:'thread',cat:'Skin',name:'Eyebrow threading',dur:15,price:60,sk:'beauty',w:5,g:'F'},
+ {id:'wax',cat:'Skin',name:'Full arms waxing',dur:30,price:400,sk:'beauty',w:3,g:'F'},
+ {id:'mani',cat:'Hands and feet',name:'Manicure',dur:45,price:600,sk:'nails',w:3,g:'F'},
+ {id:'pedi',cat:'Hands and feet',name:'Pedicure',dur:60,price:800,sk:'nails',w:3,g:'F'},
+ {id:'gel',cat:'Hands and feet',name:'Gel nail polish',dur:45,price:900,sk:'nails',w:2,g:'F'},
+ {id:'headm',cat:'Spa',name:'Head massage',dur:30,price:300,sk:'spa',w:3,g:'M'},
+ {id:'bodym',cat:'Spa',name:'Body massage',dur:60,price:1800,sk:'spa',w:2,g:'X'}];
+const ALL1=Object.fromEntries(SVC.map(s=>[s.id,1]));
+const PRODUCTS=[
+ {id:'shampoo',name:'Shampoo',unit:'ml',pack:1000,pk:'1 L bottle',stock:3200,min:2500,use:{mcut:10,wcut:20,wash:25,hspa:30,colour:30,keratin:40}},
+ {id:'cond',name:'Conditioner',unit:'ml',pack:1000,pk:'1 L bottle',stock:1400,min:1500,use:{wcut:10,wash:15,hspa:20,colour:20,keratin:20}},
+ {id:'colour',name:'Hair colour',unit:'tubes',pack:1,pk:'tube',stock:9,min:8,use:{colour:2}},
+ {id:'dev',name:'Developer',unit:'ml',pack:1000,pk:'1 L bottle',stock:1800,min:1000,use:{colour:60}},
+ {id:'kerat',name:'Keratin solution',unit:'ml',pack:1000,pk:'1 L bottle',stock:650,min:500,use:{keratin:150}},
+ {id:'spacr',name:'Hair spa cream',unit:'g',pack:500,pk:'500 g tub',stock:700,min:500,use:{hspa:50}},
+ {id:'fkit',name:'Facial kit',unit:'kits',pack:1,pk:'kit',stock:14,min:10,use:{facial:1}},
+ {id:'ckit',name:'Clean-up kit',unit:'kits',pack:1,pk:'kit',stock:9,min:10,use:{cleanup:1}},
+ {id:'wax',name:'Wax',unit:'g',pack:800,pk:'800 g tin',stock:900,min:600,use:{wax:60}},
+ {id:'gelp',name:'Gel polish',unit:'ml',pack:15,pk:'15 ml bottle',stock:120,min:60,use:{gel:3}},
+ {id:'nkit',name:'Mani-pedi disposable kit',unit:'kits',pack:50,pk:'box of 50',stock:30,min:25,use:{mani:1,pedi:1}},
+ {id:'glove',name:'Disposable gloves',unit:'pairs',pack:100,pk:'box of 100',stock:140,min:100,use:{colour:1,keratin:1,wax:1,facial:1,cleanup:1,mani:1,pedi:1,gel:1}},
+ {id:'oil',name:'Massage oil',unit:'ml',pack:1000,pk:'1 L bottle',stock:900,min:1000,use:{headm:20,bodym:80,hspa:10}},
+ {id:'towel',name:'Disposable towels',unit:'pcs',pack:100,pk:'pack of 100',stock:260,min:200,use:ALL1},
+ {id:'after',name:'Aftershave',unit:'ml',pack:500,pk:'500 ml bottle',stock:300,min:250,use:{beard:5,shave:8,mcut:2}}];
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const inr=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const fmt=m=>{const h=Math.floor(m/60),mm=m%60,h12=((h+11)%12)+1;return h12+(mm?':'+String(mm).padStart(2,'0'):'')+(h<12?' am':' pm')};
+const day0=new Date();day0.setHours(12,0,0,0);
+const dkey=o=>{const d=new Date(day0);d.setDate(d.getDate()+o);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const dlabel=(o,long)=>{const d=new Date(day0);d.setDate(d.getDate()+o);if(!long&&o===0)return'Today';if(!long&&o===1)return'Tomorrow';return d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})};
+const dow=o=>{const d=new Date(day0);d.setDate(d.getDate()+o);return d.getDay()};
+const nowMin=()=>{const n=new Date();return n.getHours()*60+n.getMinutes()};
+const svcOf=id=>SVC.find(s=>s.id===id),staffOf=id=>STAFF.find(s=>s.id===id);
+const canDo=(st,sv)=>st.sk.includes(sv.sk);
+const first=n=>n.split(' ')[0];
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- sample data (deterministic) ---------- */
+const R=rng(20261123);
+const MF=['Rahul','Arjun','Vikram','Karan','Rohan','Aditya','Manish','Nikhil','Saurabh','Gaurav','Harsh','Yash','Ankit','Mohit','Varun','Pranav','Kunal','Siddharth','Tarun','Abhishek','Ravi','Naveen','Lokesh','Faizan','Arif'];
+const FF=['Priya','Sneha','Ritu','Megha','Shruti','Aditi','Nidhi','Simran','Kriti','Isha','Payal','Divya','Swati','Tanvi','Komal','Heena','Rashmi','Bhavna','Ananya','Muskan','Riya','Sakshi','Juhi','Mehak','Sana'];
+const LN=['Sharma','Agarwal','Jain','Gupta','Meena','Choudhary','Rathore','Shekhawat','Saini','Kumawat','Khandelwal','Mathur','Singh','Verma','Joshi','Purohit','Soni','Khan','Bansal','Goyal'];
+const pick=a=>a[Math.floor(R()*a.length)];
+let customers=[];
+const mkPhone=()=>'9'+String(Math.floor(R()*1e9)).padStart(9,'0');
+for(let i=0;i<650;i++)customers.push({id:'c'+i,name:pick(MF)+' '+pick(LN),phone:mkPhone(),g:'M'});
+for(let i=650;i<1500;i++)customers.push({id:'c'+i,name:pick(FF)+' '+pick(LN),phone:mkPhone(),g:'F'});
+const males=customers.filter(c=>c.g==='M'),females=customers.filter(c=>c.g==='F');
+const chooseCust=g=>{const pool=g==='M'?males:g==='F'?females:(R()<.5?males:females);return pool[Math.floor(Math.pow(R(),1.25)*pool.length)]};
+let bookings=[],codeN=1000;
+const NOW=nowMin();
+for(let o=-90;o<=7;o++){
+  const wk=[0,6].includes(dow(o));
+  const p=o<0?(wk?.62:.42):o===0?.45:Math.max(.1,.38-.04*o);
+  for(const st of STAFF){
+    const opts=SVC.filter(s=>canDo(st,s));const tw=opts.reduce((a,s)=>a+s.w,0);
+    let t=OPEN+(R()<.4?15:0);
+    while(t<CLOSE){
+      if(t>=L1&&t<L2){t=L2;continue}
+      let r=R()*tw,sv=opts[0];for(const s of opts){r-=s.w;if(r<=0){sv=s;break}}
+      const end=t+sv.dur;
+      if(end>CLOSE||(t<L1&&end>L1)){t+=STEP;continue}
+      if(R()<p){
+        let status='booked';
+        if(o<0||(o===0&&end<=NOW))status=R()<.035?'noshow':'done';
+        const c=chooseCust(sv.g==='X'?'X':(sv.id==='colour'&&R()<.25?'M':sv.g));
+        bookings.push({id:'b'+codeN,code:codeN++,cust:c.id,staff:st.id,svc:sv.id,date:dkey(o),start:t,dur:sv.dur,status,pay:status==='done'?(R()<.62?'UPI':R()<.75?'Cash':'Card'):null,amt:sv.price,src:R()<.55?'WhatsApp':'Reception'});
+        t=end;
+      }else t+=STEP*(1+Math.floor(R()*2));
+    }
+  }
+}
+/* sample stock: about 0.4 to 2.2 weeks of normal use, a few products deliberately low */
+const COVER={shampoo:1.6,cond:.45,colour:.9,dev:1.8,kerat:1.3,spacr:2,fkit:.4,ckit:1.1,wax:1.5,gelp:2.2,nkit:.75,glove:1.2,oil:.42,towel:1,after:1.7};
+const stock={};
+{const a=dkey(-28),z=dkey(-1);const u=Object.fromEntries(PRODUCTS.map(p=>[p.id,0]));
+ for(const b of bookings)if(b.date>=a&&b.date<=z&&b.status==='done')for(const p of PRODUCTS){const x=p.use[b.svc];if(x)u[p.id]+=x}
+ const r=(v,p)=>{const q=p.pack>=500?50:p.pack>=50?5:1;return Math.max(q,Math.round(v/q)*q)};
+ for(const p of PRODUCTS){const wk=u[p.id]/4;p.min=r(wk*.5,p);stock[p.id]=r(wk*COVER[p.id],p)}}
+
+/* ---------- saved changes (this browser only) ---------- */
+const KEY='glowups-demo-v1';
+let saved={day:dkey(0),added:[],status:{},custs:[],stock:{}};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.day===saved.day)saved=s}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}};
+customers=customers.concat(saved.custs);
+bookings=bookings.concat(saved.added);
+for(const b of bookings){const c=saved.status[b.id];if(c)Object.assign(b,c)}
+for(const k in saved.stock)stock[k]=saved.stock[k];
+codeN=Math.max(codeN,...bookings.map(b=>b.code+1));
+
+/* ---------- availability ---------- */
+const active=b=>b.status==='booked'||b.status==='done';
+function isFree(stId,date,start,dur,o){
+  const end=start+dur;
+  if(start<OPEN||end>CLOSE)return false;
+  if(start<L2&&end>L1)return false;
+  if(o===0&&start<nowMin()+15)return false;
+  return!bookings.some(b=>b.staff===stId&&b.date===date&&active(b)&&start<b.start+b.dur&&b.start<end);
+}
+const freeStaff=(sv,o,start)=>STAFF.filter(st=>canDo(st,sv)&&isFree(st.id,dkey(o),start,sv.dur,o));
+function addBooking(custId,stId,svId,o,start,src){
+  const sv=svcOf(svId);
+  if(!isFree(stId,dkey(o),start,sv.dur,o))return null;
+  const b={id:'b'+codeN,code:codeN++,cust:custId,staff:stId,svc:svId,date:dkey(o),start,dur:sv.dur,status:'booked',pay:null,amt:sv.price,src};
+  bookings.push(b);saved.added.push(b);persist();return b;
+}
+function setStatus(b,status,pay){
+  const wasDone=b.status==='done';
+  b.status=status;b.pay=pay||null;saved.status[b.id]={status,pay:b.pay};
+  if(status==='done'&&!wasDone)for(const p of PRODUCTS){const u=p.use[b.svc];if(u){stock[p.id]=Math.max(0,stock[p.id]-u);saved.stock[p.id]=stock[p.id]}}
+  persist();
+}
+function findOrAddCustomer(name,phone){
+  phone=phone.replace(/\D/g,'').slice(-10);
+  let c=customers.find(x=>x.phone===phone);
+  if(!c){c={id:'n'+Date.now(),name:name.trim()||'New customer',phone,g:''};customers.push(c);saved.custs.push(c);persist()}
+  return c;
+}
+const custOf=id=>customers.find(c=>c.id===id)||{name:'Unknown',phone:''};
+
+/* ---------- UI shell ---------- */
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2600)}
+function openDlg(html,bind){$('#dlg').innerHTML=html;$('#ov').classList.add('open');bind&&bind($('#dlg'));const f=$('#dlg').querySelector('input,select,button');f&&f.focus()}
+function closeDlg(){$('#ov').classList.remove('open')}
+$('#ov').addEventListener('click',e=>{if(e.target.id==='ov'||e.target.dataset.close!==undefined)closeDlg()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDlg()});
+
+const WHO={customer:'Browsing as a customer',reception:'Signed in: Kuman Singh Sonwani, Reception',owner:'Signed in: Vaibhav Vikas Ranjan, Owner'};
+function route(){
+  const v=['customer','reception','owner'].includes(location.hash.slice(1))?location.hash.slice(1):'customer';
+  for(const k of['customer','reception','owner'])$('#nav-'+k).toggleAttribute('aria-current',k===v),k===v&&$('#nav-'+k).setAttribute('aria-current','page');
+  $('#who').textContent=WHO[v];
+  ({customer:renderCustomer,reception:renderReception,owner:renderOwner})[v]();
+}
+window.addEventListener('hashchange',route);
+
+/* ---------- customer view ---------- */
+const cv={svc:null,staff:'any',o:0,slot:null,done:null};
+function renderCustomer(){
+  const cats=[...new Set(SVC.map(s=>s.cat))];
+  const sv=cv.svc&&svcOf(cv.svc);
+  let right='';
+  if(!sv){right=`<div class="card"><h2>Pick a service to see free times</h2><p class="sub">Choose from the menu. You will then see every stylist who does it and their free slots, so you can book your favourite.</p></div>`}
+  else{
+    const pros=STAFF.filter(st=>canDo(st,sv));
+    const days=[...Array(7)].map((_,o)=>o);
+    let slots='',lunchShown=false,lastPeriod='';
+    for(let t=OPEN;t+sv.dur<=CLOSE;t+=STEP){
+      if(t<L2&&t+sv.dur>L1){if(!lunchShown){slots+=`<div class="lunch">Lunch break, 1 pm to 2 pm</div>`;lunchShown=true}continue}
+      const per=t<720?'Morning':t<1020?'Afternoon':'Evening';
+      if(per!==lastPeriod){slots+=`<div class="period" style="grid-column:1/-1">${per}</div>`;lastPeriod=per}
+      const free=cv.staff==='any'?freeStaff(sv,cv.o,t):(isFree(cv.staff,dkey(cv.o),t,sv.dur,cv.o)?[1]:[]);
+      const past=cv.o===0&&t<nowMin()+15;
+      slots+=`<button class="slot" data-t="${t}" ${free.length?'':'disabled'} aria-pressed="${cv.slot===t}">${fmt(t)}${cv.staff==='any'&&free.length?`<small>${free.length} free</small>`:''}${!free.length?`<small>${past?'passed':'booked'}</small>`:''}</button>`;
+    }
+    let strip='';
+    if(cv.staff!=='any'){
+      const st=staffOf(cv.staff);const bs=bookings.filter(b=>b.staff===st.id&&b.date===dkey(cv.o)&&active(b));
+      const pct=m=>(m-OPEN)/(CLOSE-OPEN)*100;
+      strip=`<div class="step"><h3>${esc(first(st.name))}'s day, ${dlabel(cv.o,true)}</h3>
+      <div class="strip" role="img" aria-label="${bs.length} bookings">${bs.map(b=>`<i style="left:${pct(b.start)}%;width:${b.dur/6}%"></i>`).join('')}<i class="l" style="left:${pct(L1)}%;width:10%"></i></div>
+      <div class="ticks"><span>10 am</span><span>12 pm</span><span>2 pm</span><span>4 pm</span><span>6 pm</span><span>8 pm</span></div>
+      <p class="note">Dark = booked, stripes = lunch, light = free. ${bs.length} bookings that day.</p></div>`;
+    }
+    const pickedStaff=cv.slot!=null&&(cv.staff==='any'?freeStaff(sv,cv.o,cv.slot)[0]:staffOf(cv.staff));
+    right=`<div class="card">
+      <h2>${esc(sv.name)} <span class="note">${sv.dur} min · ${inr(sv.price)}</span></h2>
+      <div class="step"><h3>Who would you like?</h3><div class="chips">
+        <button class="chip" data-st="any" aria-pressed="${cv.staff==='any'}">Anyone free<small>fastest slot</small></button>
+        ${pros.map(st=>`<button class="chip" data-st="${st.id}" aria-pressed="${cv.staff===st.id}">${esc(st.name)}<small>${esc(st.title)}</small></button>`).join('')}
+      </div></div>
+      <div class="step"><h3>Which day?</h3><div class="chips">${days.map(o=>`<button class="chip" data-o="${o}" aria-pressed="${cv.o===o}">${dlabel(o)}${o>1?'':`<small>${dlabel(o,true)}</small>`}</button>`).join('')}</div></div>
+      ${strip}
+      <div class="step"><h3>Pick a time</h3><div class="slots">${slots}</div></div>
+      ${cv.slot!=null&&pickedStaff?`<div class="step"><h3>Your details</h3>
+        <p>${esc(sv.name)} with <b>${esc(pickedStaff.name)}</b>, ${dlabel(cv.o,true)} at <b>${fmt(cv.slot)}</b>. Pay ${inr(sv.price)} at the salon.</p>
+        <form id="cform" class="form"><label>Your name<input id="cname" required autocomplete="name"></label><label>WhatsApp number<input id="cphone" required inputmode="tel" pattern="[0-9 +]{10,14}" autocomplete="tel" placeholder="10-digit mobile"></label>
+        <div style="align-self:end"><button class="btn" type="submit">Book this slot</button></div></form></div>`:''}
+      ${cv.done?`<div class="ok"><b>Booked, see you soon.</b><br>${esc(cv.done)}<br><span class="note">You'd get this confirmation and reminders on WhatsApp.</span></div>`:''}
+    </div>`;
+  }
+  $('#app').innerHTML=`<h1>Book your visit</h1><p class="sub">Open 10 am to 8 pm, every day. Lunch break 1 to 2 pm.</p>
+  <div class="grid2"><div class="card"><h2>Services and prices</h2>${cats.map(c=>`<div class="cat"><h3>${c}</h3>${SVC.filter(s=>s.cat===c).map(s=>`<button class="svc" data-svc="${s.id}" aria-pressed="${cv.svc===s.id}"><b>${esc(s.name)}</b><span>${s.dur} min · ${inr(s.price)}</span></button>`).join('')}</div>`).join('')}</div>
+  <div>${right}</div></div>`;
+  const app=$('#app');
+  app.querySelectorAll('[data-svc]').forEach(b=>b.onclick=()=>{cv.svc=b.dataset.svc;cv.slot=null;cv.done=null;const s=svcOf(cv.svc);if(cv.staff!=='any'&&!canDo(staffOf(cv.staff),s))cv.staff='any';renderCustomer();if(innerWidth<900)app.querySelector('.grid2>div:last-child').scrollIntoView({behavior:'smooth'})});
+  app.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{cv.staff=b.dataset.st;cv.slot=null;cv.done=null;renderCustomer()});
+  app.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{cv.o=+b.dataset.o;cv.slot=null;cv.done=null;renderCustomer()});
+  app.querySelectorAll('.slot[data-t]').forEach(b=>b.onclick=()=>{cv.slot=+b.dataset.t;cv.done=null;renderCustomer();const n=$('#cname');n&&n.focus()});
+  const f=$('#cform');
+  if(f){
+    const ph=$('#cphone');ph.oninput=()=>{const d=ph.value.replace(/\D/g,'').slice(-10);const c=d.length===10&&customers.find(x=>x.phone===d);if(c&&!$('#cname').value)$('#cname').value=c.name};
+    f.onsubmit=e=>{e.preventDefault();const sv=svcOf(cv.svc);
+      const stId=cv.staff==='any'?(freeStaff(sv,cv.o,cv.slot)[0]||{}).id:cv.staff;
+      const c=findOrAddCustomer($('#cname').value,$('#cphone').value);
+      const b=stId&&addBooking(c.id,stId,sv.id,cv.o,cv.slot,'Online');
+      if(!b){toast('That slot was just taken. Pick another time.');cv.slot=null;renderCustomer();return}
+      cv.done=`${sv.name} with ${staffOf(stId).name}, ${dlabel(cv.o,true)} at ${fmt(cv.slot)}. Booking code #${b.code}.`;cv.slot=null;renderCustomer();
+    };
+  }
+}
+
+/* ---------- reception view ---------- */
+const rv={tab:'schedule',o:0,q:''};
+function renderReception(){
+  const tabs=[['schedule','Today\'s chairs'],['customers','Customers'],['inventory','Inventory']];
+  $('#app').innerHTML=`<div class="tabs">${tabs.map(([k,l])=>`<button class="chip" data-tab="${k}" aria-pressed="${rv.tab===k}">${l}</button>`).join('')}</div><div id="rbody"></div>`;
+  $('#app').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{rv.tab=b.dataset.tab;renderReception()});
+  ({schedule:renderBoard,customers:renderCustomers,inventory:renderInventory})[rv.tab]();
+}
+function renderBoard(){
+  const date=dkey(rv.o);const day=bookings.filter(b=>b.date===date&&b.status!=='cancelled');
+  const booked=day.filter(b=>b.status==='booked').length,done=day.filter(b=>b.status==='done').length,ns=day.filter(b=>b.status==='noshow').length;
+  const mins=day.filter(active).reduce((a,b)=>a+b.dur,0),occ=Math.round(mins/(STAFF.length*540)*100);
+  const pct=m=>(m-OPEN)/(CLOSE-OPEN)*100;
+  const nm=nowMin(),showNow=rv.o===0&&nm>OPEN&&nm<CLOSE;
+  $('#rbody').innerHTML=`<div class="toolbar"><div><h1>${dlabel(rv.o,true)}: ${booked} to come, ${done} done</h1><p class="sub" style="margin:0">${occ}% of chair time booked${ns?`, ${ns} no-show`:''}. Click an empty spot to book, or a booking to check out.</p></div>
+  <button class="btn" id="newb">New booking</button></div>
+  <div class="toolbar"><div class="chips">${[-1,0,1,2,3,4,5,6].map(o=>`<button class="chip" data-ro="${o}" aria-pressed="${rv.o===o}">${o===-1?'Yesterday':dlabel(o)}</button>`).join('')}</div>
+  <div class="legend"><span><i style="background:var(--busy)"></i>Booked</span><span><i style="background:var(--brassT);border:1px solid var(--brass)"></i>Done, paid</span><span><i style="border:1px solid var(--warn)"></i>No-show</span><span><i style="background:repeating-linear-gradient(135deg,var(--line) 0 3px,transparent 3px 6px)"></i>Lunch</span></div></div>
+  <div class="boardwrap"><div class="board">
+   <div class="brow"><div class="bname"></div><div class="track hours">${[10,11,12,13,14,15,16,17,18,19].map(h=>`<span style="left:${(h-10)*10}%;${h===10?'transform:none':''}">${fmt(h*60)}</span>`).join('')}</div></div>
+   ${STAFF.map(st=>`<div class="brow"><div class="bname"><b>${esc(st.name)}</b><span>${esc(st.title)}</span></div>
+   <div class="track" data-staff="${st.id}"><div class="lb"></div>${showNow?`<div class="now" style="left:${pct(nm)}%"></div>`:''}
+   ${day.filter(b=>b.staff===st.id).map(b=>`<button class="bk ${b.status}" data-b="${b.id}" style="left:${pct(b.start)}%;width:calc(${b.dur/6}% - 3px)" title="${esc(custOf(b.cust).name)}, ${esc(svcOf(b.svc).name)}, ${fmt(b.start)}"><b>${esc(first(custOf(b.cust).name))}</b> ${esc(svcOf(b.svc).name)}</button>`).join('')}</div></div>`).join('')}
+  </div></div><p class="note">Sample salon and bookings, generated for this demo. Changes you make are kept in this browser for today only.</p>`;
+  const body=$('#rbody');
+  body.querySelectorAll('[data-ro]').forEach(b=>b.onclick=()=>{rv.o=+b.dataset.ro;renderBoard()});
+  body.querySelectorAll('.bk').forEach(el=>el.onclick=e=>{e.stopPropagation();bookingDlg(bookings.find(b=>b.id===el.dataset.b))});
+  body.querySelectorAll('.track[data-staff]').forEach(tr=>tr.onclick=e=>{
+    const r=tr.getBoundingClientRect();let m=OPEN+Math.floor((e.clientX-r.left)/r.width*(CLOSE-OPEN)/STEP)*STEP;
+    if(m>=L1&&m<L2){toast('That is the lunch break.');return}
+    if(rv.o<0){toast('That day has passed.');return}
+    newBookingDlg({staff:tr.dataset.staff,o:rv.o,start:m});
+  });
+  $('#newb').onclick=()=>newBookingDlg({o:Math.max(0,rv.o)});
+}
+function bookingDlg(b){
+  const c=custOf(b.cust),sv=svcOf(b.svc),st=staffOf(b.staff);
+  openDlg(`<h2>Booking #${b.code}</h2><div class="kv"><span>Customer</span><b>${esc(c.name)}</b><span>Phone</span><div>${esc(c.phone)}</div><span>Service</span><div>${esc(sv.name)}, ${inr(sv.price)}</div><span>Stylist</span><div>${esc(st.name)}</div><span>Time</span><div>${dlabel(Math.round((new Date(b.date+'T12:00')-day0)/864e5),true)}, ${fmt(b.start)} to ${fmt(b.start+b.dur)}</div><span>Booked via</span><div>${esc(b.src)}</div><span>Status</span><div>${b.status==='done'?`Done, paid by ${esc(b.pay)}`:b.status==='noshow'?'No-show':'Booked'}</div></div>
+  ${b.status==='booked'?`<h3 style="margin-top:18px">Check out</h3><div class="row"><button class="btn" data-pay="UPI">Paid by UPI</button><button class="btn" data-pay="Cash">Paid in cash</button><button class="btn" data-pay="Card">Paid by card</button></div>
+  <div class="row"><button class="btn ghost" data-act="noshow">Mark no-show</button><button class="btn ghost" data-act="cancelled">Cancel booking</button><button class="btn ghost" data-close>Close</button></div>`:`<div class="row"><button class="btn ghost" data-close>Close</button></div>`}`,d=>{
+    d.querySelectorAll('[data-pay]').forEach(x=>x.onclick=()=>{setStatus(b,'done',x.dataset.pay);closeDlg();toast(`Marked done. ${inr(b.amt)} recorded, stock updated.`);renderReception()});
+    d.querySelectorAll('[data-act]').forEach(x=>x.onclick=()=>{setStatus(b,x.dataset.act);closeDlg();toast(x.dataset.act==='noshow'?'Marked as no-show.':'Booking cancelled. The slot is free again.');renderReception()});
+  });
+}
+function newBookingDlg(pre){
+  const st0=pre.staff?staffOf(pre.staff):null;
+  const svcs=st0?SVC.filter(s=>canDo(st0,s)):SVC;
+  openDlg(`<h2>New booking</h2><form id="nb" class="form" style="grid-template-columns:minmax(0,1fr)">
+   <label>Customer phone<input id="np" inputmode="tel" required placeholder="10-digit mobile"></label>
+   <label>Customer name<input id="nn" required></label><p class="note" id="nhint" style="margin:0">Type the phone first. Known customers fill in by themselves.</p>
+   <label>Service<select id="ns">${svcs.map(s=>`<option value="${s.id}">${esc(s.name)}, ${s.dur} min, ${inr(s.price)}</option>`).join('')}</select></label>
+   <label>Stylist<select id="nst"></select></label>
+   <label>Day<select id="nd">${[0,1,2,3,4,5,6].map(o=>`<option value="${o}" ${o===pre.o?'selected':''}>${dlabel(o,true)}</option>`).join('')}</select></label>
+   <label>Time<select id="nt"></select></label>
+   <div class="row" style="margin:0"><button class="btn" type="submit">Book</button><button class="btn ghost" type="button" data-close>Cancel</button></div></form>`,d=>{
+    const ns=d.querySelector('#ns'),nst=d.querySelector('#nst'),nd=d.querySelector('#nd'),nt=d.querySelector('#nt'),np=d.querySelector('#np'),nn=d.querySelector('#nn');
+    const fillStaff=()=>{const sv=svcOf(ns.value);const pros=STAFF.filter(s=>canDo(s,sv));nst.innerHTML=pros.map(s=>`<option value="${s.id}" ${pre.staff===s.id?'selected':''}>${esc(s.name)}</option>`).join('');fillTimes()};
+    const fillTimes=()=>{const sv=svcOf(ns.value),o=+nd.value;let h='';for(let t=OPEN;t+sv.dur<=CLOSE;t+=STEP)if(isFree(nst.value,dkey(o),t,sv.dur,o))h+=`<option value="${t}" ${t===pre.start?'selected':''}>${fmt(t)}</option>`;nt.innerHTML=h||'<option value="">No free time this day</option>'};
+    ns.onchange=fillStaff;nst.onchange=fillTimes;nd.onchange=fillTimes;fillStaff();
+    np.oninput=()=>{const p=np.value.replace(/\D/g,'').slice(-10);const c=p.length===10&&customers.find(x=>x.phone===p);d.querySelector('#nhint').textContent=c?`Returning customer: ${c.name}`:p.length===10?'New customer. They will be registered on booking.':'Type the phone first. Known customers fill in by themselves.';if(c)nn.value=c.name};
+    d.querySelector('#nb').onsubmit=e=>{e.preventDefault();if(!nt.value){toast('Pick another day or stylist. No free time.');return}
+      const c=findOrAddCustomer(nn.value,np.value);const b=addBooking(c.id,nst.value,ns.value,+nd.value,+nt.value,'Reception');
+      if(!b){toast('That time was just taken.');fillTimes();return}
+      closeDlg();toast(`Booked #${b.code}: ${first(c.name)} with ${first(staffOf(b.staff).name)} at ${fmt(b.start)}.`);rv.o=+nd.value;renderReception()};
+  });
+}
+function custStats(){
+  const m={};for(const b of bookings){if(b.status!=='done')continue;const s=m[b.cust]||(m[b.cust]={n:0,spent:0,last:'',st:{}});s.n++;s.spent+=b.amt;if(b.date>s.last)s.last=b.date;s.st[b.staff]=(s.st[b.staff]||0)+1}
+  return m;
+}
+const daysAgo=k=>Math.round((day0-new Date(k+'T12:00'))/864e5);
+function renderCustomers(){
+  const cs=custStats();const q=rv.q.toLowerCase();
+  const list=customers.map(c=>({c,s:cs[c.id]||{n:0,spent:0,last:'',st:{}}})).filter(x=>!q||x.c.name.toLowerCase().includes(q)||x.c.phone.includes(q)).sort((a,b)=>(b.s.last||'').localeCompare(a.s.last||''));
+  $('#rbody').innerHTML=`<div class="grid2b" style="margin-top:0"><div class="card"><div class="toolbar"><h2 style="margin:0">${customers.length} customers</h2><input id="cq" type="search" placeholder="Search name or phone" value="${esc(rv.q)}" style="max-width:280px"></div>
+  <table class="stack"><thead><tr><th>Name</th><th>Phone</th><th class="n">Visits</th><th>Last visit</th><th class="n">Spent</th><th>Usual stylist</th></tr></thead><tbody>
+  ${list.slice(0,40).map(({c,s})=>{const fav=Object.entries(s.st).sort((a,b)=>b[1]-a[1])[0];return`<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.phone)}</td><td class="n">${s.n}</td><td>${s.last?daysAgo(s.last)+' days ago':'Not yet'}</td><td class="n">${inr(s.spent)}</td><td>${fav?esc(first(staffOf(fav[0]).name)):''}</td></tr>`}).join('')}
+  </tbody></table>${list.length>40?`<p class="note">Showing 40 of ${list.length}. Search to narrow down.</p>`:''}${!list.length?'<p>No customer matches. Register them on the right.</p>':''}</div>
+  <div class="card"><h2>Register a customer</h2><form id="rc" class="form" style="grid-template-columns:minmax(0,1fr)"><label>Name<input id="rn" required></label><label>WhatsApp number<input id="rp" required inputmode="tel" placeholder="10-digit mobile"></label><button class="btn" type="submit">Register</button></form>
+  <p class="note">Customers who book on WhatsApp or online are registered automatically.</p></div></div>`;
+  const qi=$('#cq');qi.oninput=()=>{rv.q=qi.value;renderCustomers();const n=$('#cq');n.focus();n.setSelectionRange(n.value.length,n.value.length)};
+  $('#rc').onsubmit=e=>{e.preventDefault();const p=$('#rp').value.replace(/\D/g,'');if(p.length<10){toast('Enter a 10-digit mobile number.');return}
+    const ex=customers.find(x=>x.phone===p.slice(-10));if(ex){toast(`Already registered as ${ex.name}.`);return}
+    const c=findOrAddCustomer($('#rn').value,p);rv.q=c.phone;toast(`${c.name} registered.`);renderCustomers()};
+}
+function usage(fromO,toO,statusOk){
+  const u=Object.fromEntries(PRODUCTS.map(p=>[p.id,0]));const a=dkey(fromO),z=dkey(toO);
+  for(const b of bookings){if(b.date<a||b.date>z||!statusOk(b))continue;for(const p of PRODUCTS){const x=p.use[b.svc];if(x)u[p.id]+=x}}
+  return u;
+}
+function forecast(){
+  const w=[1,2,3,4].map(k=>usage(-7*k,-7*k+6,b=>b.status==='done'));
+  const booked=usage(0,7,b=>b.status==='booked');
+  return PRODUCTS.map(p=>{
+    const avg=(w[0][p.id]+w[1][p.id]+w[2][p.id]+w[3][p.id])/4;
+    const prev=w[2][p.id]+w[3][p.id],recent=w[0][p.id]+w[1][p.id];
+    const trend=prev?Math.min(1.2,Math.max(.85,recent/prev)):1;
+    const fc=Math.round(avg*trend),s=stock[p.id];
+    const need=fc+p.min-s,packs=need>0?Math.ceil(need/p.pack):0;
+    const daysLeft=avg?Math.floor(s/(avg/7)):99;
+    return{p,avg:Math.round(avg),fc,booked:booked[p.id],s,packs,daysLeft,low:s<p.min};
+  });
+}
+const qty=(n,p)=>Math.round(n).toLocaleString('en-IN')+' '+p.unit;
+function renderInventory(){
+  const f=forecast().sort((a,b)=>b.packs-a.packs||a.daysLeft-b.daysLeft);
+  const toOrder=f.filter(x=>x.packs>0),low=f.filter(x=>x.low).length;
+  $('#rbody').innerHTML=`<h1>${toOrder.length} products to order for next week</h1><p class="sub">${low} below minimum level now. Forecast = average use over the last 4 weeks, adjusted for the recent trend. Use is counted from completed services.</p>
+  <div class="toolbar"><div class="note">Suggested order keeps you above the minimum level after next week.</div><div class="chips"><button class="btn ghost sm" id="copyo">Copy order list</button></div></div>
+  <div class="card scroll"><table class="stack"><thead><tr><th>Product</th><th class="n">In stock</th><th class="n">Min level</th><th class="n">Used per week</th><th class="n">Next week</th><th class="n">Already booked</th><th>Status</th><th>Order</th><th></th></tr></thead><tbody>
+  ${f.map(x=>`<tr><td><b>${esc(x.p.name)}</b></td><td class="n">${qty(x.s,x.p)}</td><td class="n">${qty(x.p.min,x.p)}</td><td class="n">${qty(x.avg,x.p)}</td><td class="n">${qty(x.fc,x.p)}</td><td class="n">${qty(x.booked,x.p)}</td>
+  <td>${x.low?'<span class="pill low">Below minimum</span>':x.daysLeft<7?`<span class="pill soon">Lasts ${x.daysLeft} day${x.daysLeft===1?'':'s'}</span>`:'<span class="pill okp">OK</span>'}</td>
+  <td>${x.packs?`<b>${x.packs} × ${esc(x.p.pk)}</b>`:'<span class="note">Nothing</span>'}</td><td><button class="btn ghost sm" data-recv="${x.p.id}">Receive</button></td></tr>`).join('')}
+  </tbody></table></div><p class="note">Stock goes down when reception marks a service done. "Already booked" is what next week's bookings will use for sure; walk-ins add to it. Sample stock levels.</p>`;
+  $('#copyo').onclick=async()=>{const t='Order for The Glow Room, '+dlabel(0,true)+'\n'+toOrder.map(x=>`- ${x.p.name}: ${x.packs} × ${x.p.pk}`).join('\n');try{await navigator.clipboard.writeText(t);toast('Order list copied.')}catch(e){openDlg(`<h2>Order list</h2><pre style="white-space:pre-wrap">${esc(t)}</pre><div class="row"><button class="btn ghost" data-close>Close</button></div>`)}};
+  $('#rbody').querySelectorAll('[data-recv]').forEach(b=>b.onclick=()=>{const p=PRODUCTS.find(x=>x.id===b.dataset.recv);
+    openDlg(`<h2>Receive ${esc(p.name)}</h2><p>In stock: ${qty(stock[p.id],p)}. Sold as ${esc(p.pk)} (${qty(p.pack,p)}).</p><form id="rf" class="form"><label>Packs received<input id="rq" type="number" min="1" value="1" required></label><div style="align-self:end" class="row"><button class="btn" type="submit">Add to stock</button><button class="btn ghost" type="button" data-close>Cancel</button></div></form>`,d=>{
+      d.querySelector('#rf').onsubmit=e=>{e.preventDefault();const n=Math.max(1,+d.querySelector('#rq').value||1);stock[p.id]+=n*p.pack;saved.stock[p.id]=stock[p.id];persist();closeDlg();toast(`${p.name}: ${qty(stock[p.id],p)} in stock now.`);renderInventory()}});
+  });
+}
+
+/* ---------- owner view ---------- */
+function renderOwner(){
+  const done=bookings.filter(b=>b.status==='done');
+  const sum=(a,z)=>{const A=dkey(a),Z=dkey(z);return done.filter(b=>b.date>=A&&b.date<=Z)};
+  const rev=l=>l.reduce((a,b)=>a+b.amt,0);
+  const today=sum(0,0),wk=sum(-6,0),pwk=sum(-13,-7),m=sum(-27,0),pm=sum(-55,-28);
+  const chg=(a,b)=>b?Math.round((a-b)/b*100):0;
+  const wkC=chg(rev(wk),rev(pwk)),mC=chg(rev(m),rev(pm));
+  const tmr=bookings.filter(b=>b.date===dkey(1)&&b.status==='booked').length;
+  const wkAll=bookings.filter(b=>b.date>=dkey(-6)&&b.date<=dkey(0)&&b.status!=='cancelled');
+  const ns=wkAll.filter(b=>b.status==='noshow').length;
+  const occ=Math.round(wkAll.filter(active).reduce((a,b)=>a+b.dur,0)/(STAFF.length*540*7)*100);
+  const firstVisit={};for(const b of done.slice().sort((a,b)=>a.date.localeCompare(b.date)))if(!firstVisit[b.cust])firstVisit[b.cust]=b.date;
+  const wkCust=[...new Set(wk.map(b=>b.cust))],newC=wkCust.filter(c=>firstVisit[c]>=dkey(-6)).length;
+  const staffRows=STAFF.map(st=>{const l=wk.filter(b=>b.staff===st.id);return{st,n:l.length,r:rev(l),occ:Math.round(wkAll.filter(b=>b.staff===st.id&&active(b)).reduce((a,b)=>a+b.dur,0)/(540*7)*100)}}).sort((a,b)=>b.r-a.r);
+  const cats=[...new Set(SVC.map(s=>s.cat))].map(c=>({c,r:rev(m.filter(b=>svcOf(b.svc).cat===c))})).sort((a,b)=>b.r-a.r);const maxC=Math.max(...cats.map(x=>x.r),1);
+  const pays=['UPI','Cash','Card'].map(p=>({p,r:rev(m.filter(b=>b.pay===p))}));const tm=rev(m)||1;
+  const cs=custStats();const inactive=customers.map(c=>({c,s:cs[c.id]})).filter(x=>x.s&&x.s.n>=2&&daysAgo(x.s.last)>45).sort((a,b)=>b.s.spent-a.s.spent);
+  const lowN=forecast().filter(x=>x.low).length;
+  $('#app').innerHTML=`<h1>${inr(rev(wk))} earned in the last 7 days, ${wkC>=0?'up':'down'} ${Math.abs(wkC)}% on the week before</h1>
+  <p class="sub">${new Date().getHours()<12?'Good morning':new Date().getHours()<17?'Good afternoon':'Good evening'}, Vaibhav. Figures count completed, paid services only.</p>
+  <div class="kpis">
+   <div class="kpi"><span>Today so far</span><b>${inr(rev(today))}</b><small>${today.length} services done</small></div>
+   <div class="kpi"><span>Last 28 days</span><b>${inr(rev(m))}</b><small class="${mC>=0?'up':'down'}">${mC>=0?'+':''}${mC}% vs previous 28</small></div>
+   <div class="kpi"><span>Chair time booked, 7 days</span><b>${occ}%</b><small>${STAFF.length} staff, 9 working hours a day</small></div>
+   <div class="kpi"><span>Customers, 7 days</span><b>${wkCust.length}</b><small>${newC} new, ${wkCust.length-newC} returning</small></div>
+   <div class="kpi"><span>Tomorrow</span><b>${tmr} bookings</b><small>${ns} no-shows in last 7 days</small></div>
+  </div>
+  <div class="card"><h2>Daily earnings, last 28 days</h2><div class="fig" id="chart"></div></div>
+  <div class="grid2b">
+   <div class="card scroll"><h2>Staff, last 7 days</h2><table class="stack"><thead><tr><th>Staff</th><th class="n">Customers</th><th class="n">Earnings</th><th class="n">Chair time booked</th></tr></thead><tbody>
+   ${staffRows.map(x=>`<tr><td><b>${esc(x.st.name)}</b><br><span class="note">${esc(x.st.title)}</span></td><td class="n">${x.n}</td><td class="n">${inr(x.r)}</td><td class="n">${x.occ}%</td></tr>`).join('')}</tbody></table></div>
+   <div><div class="card"><h2>Earnings by service, 28 days</h2>${cats.map(x=>`<div class="bar"><span>${x.c}</span><div><i style="width:${x.r/maxC*100}%"></i></div><span>${inr(x.r)}</span></div>`).join('')}</div>
+   <div class="card" style="margin-top:20px"><h2>How customers paid, 28 days</h2>${pays.map(x=>`<div class="bar"><span>${x.p}</span><div><i style="width:${x.r/tm*100}%;background:var(--brass)"></i></div><span>${Math.round(x.r/tm*100)}%</span></div>`).join('')}</div></div>
+  </div>
+  <div class="grid2b">
+   <div class="card scroll"><h2>${inactive.length} regulars have not come back in 45+ days</h2><p class="note" style="margin-top:-6px">Customers with 2 or more visits. Good people for a "we miss you" WhatsApp message.</p>
+   <table class="stack"><thead><tr><th>Customer</th><th>Phone</th><th class="n">Visits</th><th class="n">Last visit</th><th class="n">Spent</th></tr></thead><tbody>
+   ${inactive.slice(0,8).map(x=>`<tr><td><b>${esc(x.c.name)}</b></td><td>${esc(x.c.phone)}</td><td class="n">${x.s.n}</td><td class="n">${daysAgo(x.s.last)} days ago</td><td class="n">${inr(x.s.spent)}</td></tr>`).join('')}</tbody></table></div>
+   <div class="card"><h2>Stock</h2><p>${lowN} products are below their minimum level.</p><a class="btn" href="#reception" id="toinv" style="display:inline-block;text-decoration:none">Open inventory</a></div>
+  </div>
+  <p class="note">All figures come from the sample bookings generated for this demo.</p>`;
+  $('#toinv').onclick=()=>{rv.tab='inventory'};
+  const days=[...Array(28)].map((_,i)=>{const o=i-27;return{o,r:rev(done.filter(b=>b.date===dkey(o)))}});
+  const s=$('#chart');
+  const draw=()=>{const W=s.clientWidth,H=s.clientHeight,pl=W<520?40:58,pb=28,pt=10,mx=Math.max(...days.map(d=>d.r))*1.1||1;
+    const bw=(W-pl-8)/days.length,y=v=>pt+(H-pt-pb)*(1-v/mx);const step=mx>60000?20000:mx>30000?10000:5000;let g='';
+    for(let v=0;v<=mx;v+=step)g+=`<line x1="${pl}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${pl-6}" y="${y(v)+4}" text-anchor="end" font-size="12" fill="var(--mute)">${v?'₹'+v/1000+'k':'0'}</text>`;
+    days.forEach((d,i)=>{const x=pl+i*bw+2,wkend=[0,6].includes(dow(d.o));g+=`<rect x="${x}" y="${y(d.r)}" width="${Math.max(2,bw-4)}" height="${H-pb-y(d.r)}" rx="3" fill="${d.o===0?'var(--rose)':wkend?'var(--plum2)':'var(--busy)'}" opacity="${d.o===0?1:.85}"><title>${dlabel(d.o,true)}: ${inr(d.r)}</title></rect>`;
+      if(i%(W<520?7:4)===0||d.o===0)g+=`<text x="${x+bw/2-2}" y="${H-8}" text-anchor="middle" font-size="12" fill="var(--mute)">${d.o===0?'Today':dlabel(d.o,true).replace(/^\w+,? /,'')}</text>`});
+    s.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Daily earnings for the last 28 days">${g}</svg>`};
+  const ro=new ResizeObserver(draw);ro.observe(s);
+}
+route();
+}
+</script>
+</body>
+</html>
